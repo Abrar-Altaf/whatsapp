@@ -21,12 +21,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/chatrooms/{chatroomId}/messages")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class MessageController {
-    private final MessageService messageService;
+    @Autowired
+    private MessageService messageService;
 
     @Value("${attachment.picture.dir:src/main/resources/static/picture}")
     private String pictureDir;
@@ -34,22 +36,21 @@ public class MessageController {
     private String videoDir;
     private static final long MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 
-    private Long getUserIdFromHeader(String userIdHeader) {
-        try {
-            return Long.parseLong(userIdHeader);
-        } catch (Exception e) {
-            return null;
-        }
+    private String getUsernameFromHeader(String usernameHeader) {
+        return usernameHeader;
     }
 
     // List messages in chatroom (paginated)
     @GetMapping
-    public ResponseEntity<?> listMessages(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> listMessages(@RequestHeader("X-USERNAME") String usernameHeader,
                                           @PathVariable Long chatroomId,
                                           @RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "20") int size) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = messageService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         Pageable pageable = PageRequest.of(page, size);
         try {
             Page<Message> messages = messageService.listMessages(chatroomId, userId, pageable);
@@ -61,12 +62,15 @@ public class MessageController {
 
     // Send a message (text or attachment)
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<?> sendMessage(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> sendMessage(@RequestHeader("X-USERNAME") String usernameHeader,
                                          @PathVariable Long chatroomId,
                                          @RequestParam(value = "content", required = false) String content,
                                          @RequestParam(value = "attachment", required = false) MultipartFile attachment) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = messageService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         try {
             Message message = messageService.sendMessage(chatroomId, userId, content, attachment);
             return ResponseEntity.ok(message);

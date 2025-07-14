@@ -8,6 +8,7 @@ import com.whatsapp.whatsapp.repository.MessageRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
 import com.whatsapp.whatsapp.service.EmojiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,11 +17,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class EmojiServiceImpl implements EmojiService {
-    private final MessageEmojiRepository messageEmojiRepository;
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private MessageEmojiRepository messageEmojiRepository;
+    @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public MessageEmoji addOrReplaceEmoji(Long messageId, Long userId, String emojiTypeStr) {
@@ -61,5 +64,10 @@ public class EmojiServiceImpl implements EmojiService {
             }
         }
         return filtered;
+    }
+
+    @Override
+    public java.util.Optional<com.whatsapp.whatsapp.entity.User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 } 

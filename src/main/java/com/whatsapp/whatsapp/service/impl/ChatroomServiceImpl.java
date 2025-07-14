@@ -8,6 +8,7 @@ import com.whatsapp.whatsapp.repository.ChatroomRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
 import com.whatsapp.whatsapp.service.ChatroomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,13 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class ChatroomServiceImpl implements ChatroomService {
-    private final ChatroomRepository chatroomRepository;
-    private final ChatroomMemberRepository chatroomMemberRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
+    @Autowired
+    private ChatroomMemberRepository chatroomMemberRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Page<Chatroom> listChatroomsForUser(Long userId, Pageable pageable) {
@@ -77,5 +80,10 @@ public class ChatroomServiceImpl implements ChatroomService {
             }
         }
         return added;
+    }
+
+    @Override
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 } 

@@ -7,7 +7,7 @@ import com.whatsapp.whatsapp.repository.ChatroomRepository;
 import com.whatsapp.whatsapp.repository.MessageRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
 import com.whatsapp.whatsapp.service.MessageService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +25,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
-    private final MessageRepository messageRepository;
-    private final ChatroomRepository chatroomRepository;
-    private final ChatroomMemberRepository chatroomMemberRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
+    @Autowired
+    private ChatroomMemberRepository chatroomMemberRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${attachment.picture.dir:src/main/resources/static/picture}")
     private String pictureDir;
@@ -93,6 +96,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Optional<Message> getMessageById(Long messageId) {
         return messageRepository.findById(messageId);
+    }
+
+    @Override
+    public Optional<com.whatsapp.whatsapp.entity.User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     private boolean isPicture(String ext) {

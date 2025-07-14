@@ -12,4 +12,5 @@ public interface MessageService {
     Page<Message> listMessages(Long chatroomId, Long userId, Pageable pageable);
     Message sendMessage(Long chatroomId, Long userId, String content, MultipartFile attachment) throws IOException;
     Optional<Message> getMessageById(Long messageId);
+    Optional<com.whatsapp.whatsapp.entity.User> getUserByUsername(String username);
 } 

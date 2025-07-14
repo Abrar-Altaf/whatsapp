@@ -5,7 +5,7 @@ A Spring Boot backend server implementing WhatsApp-like chat features: user prof
 ---
 
 ## Features
-- **User Registration & Login**: Register and look up users by username
+- **User Registration & Login**: Register and look up users by country code and mobile number
 - **User Profile**: View and update your profile
 - **Chatrooms**: 1:1 and group chatrooms, add members, list chatrooms (paginated)
 - **Messages**: Send text or attachments (picture/video, max 10MB), list messages (paginated)
@@ -63,18 +63,21 @@ Once running, access Swagger UI at:
 - **Body:**
   ```json
   {
-    "username": "alice",
-    "displayName": "Alice",
-    "avatarUrl": "https://example.com/avatar.png"
+    "countryCode": "+1",
+    "mobileNumber": "1234567890",
+    "displayName": "Alice"
   }
   ```
-- **Response:** 200 OK (created user), 409 Conflict (username exists)
+- **Response:** 200 OK (created user, includes generated `username`), 409 Conflict (user already exists)
 
 #### Login
-- **POST** `/api/register/login`
+- **POST** `/api/login`
 - **Body:**
   ```json
-  { "username": "alice" }
+  {
+    "countryCode": "+1",
+    "mobileNumber": "1234567890"
+  }
   ```
 - **Response:** 200 OK (user info), 404 Not Found
 
@@ -84,20 +87,29 @@ Once running, access Swagger UI at:
 
 #### Get My Profile
 - **GET** `/api/profile`
-- **Headers:** `X-USER-ID: <userId>`
-- **Response:** 200 OK (user info)
+- **Headers:** `X-USERNAME: <username>`
+- **Response:** 200 OK (user info, includes `profileUrl` field)
 
 #### Update My Profile
 - **PUT** `/api/profile`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
   {
     "displayName": "Alice Wonderland",
-    "avatarUrl": "https://example.com/newavatar.png"
+    "profileUrl": "https://example.com/newavatar.png"
   }
   ```
 - **Response:** 200 OK (updated user)
+
+#### Upload Profile Picture
+- **POST** `/api/profile/upload-picture`
+- **Headers:** `X-USERNAME: <username>`
+- **Content-Type:** `multipart/form-data`
+- **Form field:**
+  - `file` (required, jpg/jpeg/png, max 10MB)
+- **Response:** 200 OK (URL of uploaded profile picture)
+- **Description:** Uploads a new profile picture for the user. The backend saves the file under `src/main/resources/static/profile` and updates the user's `profileUrl`. The image is then visible to all users via the profile API.
 
 ---
 
@@ -105,12 +117,12 @@ Once running, access Swagger UI at:
 
 #### List My Chatrooms
 - **GET** `/api/chatrooms?page=0&size=10`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Response:** 200 OK (list of chatrooms)
 
 #### Create Chatroom
 - **POST** `/api/chatrooms`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
   {
@@ -123,12 +135,12 @@ Once running, access Swagger UI at:
 
 #### Get Chatroom Details
 - **GET** `/api/chatrooms/{id}`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Response:** 200 OK (chatroom info), 403 if not a member
 
 #### Add Members to Chatroom
 - **POST** `/api/chatrooms/{id}/members`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
   { "memberIds": [4,5] }
@@ -141,12 +153,12 @@ Once running, access Swagger UI at:
 
 #### List Messages in Chatroom
 - **GET** `/api/chatrooms/{chatroomId}/messages?page=0&size=20`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Response:** 200 OK (paginated list of messages)
 
 #### Send Message (Text or Attachment)
 - **POST** `/api/chatrooms/{chatroomId}/messages`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Content-Type:** `multipart/form-data`
 - **Form fields:**
   - `content` (text, optional)
@@ -159,7 +171,7 @@ Once running, access Swagger UI at:
 
 #### Add/Replace Emoji Reaction
 - **POST** `/api/messages/{messageId}/emoji`
-- **Headers:** `X-USER-ID: <userId>`
+- **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
   { "emojiType": "thumbup" }
@@ -173,11 +185,18 @@ Once running, access Swagger UI at:
 
 ---
 
+## Authentication Note
+- All authenticated endpoints require the `X-USERNAME` header with the backend-generated username (e.g., `username_ab12cd`).
+- The username is returned in the response when a user registers.
+- Do not use userId in headers or requests.
+
+---
+
 ## Attachments
 - Images: jpg, jpeg, png, gif, bmp, webp
 - Videos: mp4, mov, avi, mkv, webm
 - Max size: 10MB
-- Saved under `src/main/resources/static/picture` or `static/video`
+- Saved under `src/main/resources/static/picture`, `static/video`, or `static/profile` (for profile pictures)
 
 ---
 
@@ -185,7 +204,7 @@ Once running, access Swagger UI at:
 - ORM: Spring Data JPA
 - DB: PostgreSQL (default), H2 (dev, see commented config)
 - API docs: Swagger/OpenAPI
-- Simple auth: pass user id in `X-USER-ID` header
+- Simple auth: pass username in `X-USERNAME` header
 - Pagination: all list endpoints
 
 ---
@@ -203,5 +222,51 @@ Once running, access Swagger UI at:
 
 ---
 
-## License
-MIT 
+## Dependency Injection Style
+
+This project uses **field injection** with `@Autowired` for all controllers and service implementations, as shown below:
+
+```java
+@RestController
+public class MyController {
+    @Autowired
+    private MyService myService;
+    // ...
+}
+```
+
+All dependencies are injected directly into non-final fields. This is a classic Spring style and works well for many use cases.
+
+> **Note:** While field injection is supported and works, modern Spring best practices recommend constructor injection for better testability and immutability. If you prefer constructor injection, you can refactor to use Lombok's `@RequiredArgsConstructor` and `final` fields instead.
+
+---
+
+## Example
+
+**Preferred (constructor injection with Lombok):**
+```java
+@RequiredArgsConstructor
+@RestController
+public class MyController {
+    private final MyService myService; // injected by constructor
+}
+```
+
+**Not recommended (field injection):**
+```java
+@RestController
+public class MyController {
+    @Autowired
+    private MyService myService; // field injection
+}
+```
+
+---
+
+## Summary
+
+- **Constructor injection** (with `@RequiredArgsConstructor`) is the modern, recommended way.
+- **No need for `@Autowired`** on constructors if there’s only one.
+- **Field injection** (`@Autowired` on fields) is discouraged for new code.
+
+Let me know if you want to see an example with `@Autowired`, or if you have more questions about Spring best practices! 

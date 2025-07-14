@@ -13,4 +13,5 @@ public interface ChatroomService {
     Chatroom createChatroom(Long creatorId, String name, Boolean isGroup, List<Long> memberIds);
     Optional<Chatroom> getChatroomForUser(Long chatroomId, Long userId);
     List<User> addMembers(Long chatroomId, Long userId, List<Long> memberIds);
+    Optional<User> getUserByUsername(String username);
 } 

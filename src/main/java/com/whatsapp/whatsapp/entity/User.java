@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"country_code", "mobile_number"})
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +24,11 @@ public class User {
     @Column(nullable = false)
     private String displayName;
 
-    private String avatarUrl;
+    @Column(name = "country_code", nullable = false)
+    private String countryCode;
+
+    @Column(name = "mobile_number", nullable = false)
+    private String mobileNumber;
+
+    private String profileUrl;
 } 

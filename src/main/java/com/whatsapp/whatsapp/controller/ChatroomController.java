@@ -8,6 +8,7 @@ import com.whatsapp.whatsapp.repository.ChatroomRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
 import com.whatsapp.whatsapp.service.ChatroomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,35 +19,38 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/chatrooms")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class ChatroomController {
-    private final ChatroomService chatroomService;
+    @Autowired
+    private ChatroomService chatroomService;
 
-    private Long getUserIdFromHeader(String userIdHeader) {
-        try {
-            return Long.parseLong(userIdHeader);
-        } catch (Exception e) {
-            return null;
-        }
+    private String getUsernameFromHeader(String usernameHeader) {
+        return usernameHeader;
     }
 
     // List my chatrooms (paginated)
     @GetMapping
-    public ResponseEntity<?> listChatrooms(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> listChatrooms(@RequestHeader("X-USERNAME") String usernameHeader,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = chatroomService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(chatroomService.listChatroomsForUser(userId, pageable).getContent());
     }
 
     // Create a new chatroom (1:1 or group)
     @PostMapping
-    public ResponseEntity<?> createChatroom(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> createChatroom(@RequestHeader("X-USERNAME") String usernameHeader,
                                             @RequestBody CreateChatroomRequest req) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = chatroomService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         try {
             Chatroom chatroom = chatroomService.createChatroom(userId, req.getName(), req.getIsGroup(), req.getMemberIds());
             return ResponseEntity.ok(chatroom);
@@ -57,10 +61,13 @@ public class ChatroomController {
 
     // Get chatroom details
     @GetMapping("/{id}")
-    public ResponseEntity<?> getChatroom(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> getChatroom(@RequestHeader("X-USERNAME") String usernameHeader,
                                          @PathVariable Long id) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = chatroomService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         Optional<Chatroom> chatroomOpt = chatroomService.getChatroomForUser(id, userId);
         if (chatroomOpt.isPresent()) {
             return ResponseEntity.ok(chatroomOpt.get());
@@ -72,11 +79,14 @@ public class ChatroomController {
 
     // Add member(s) to chatroom
     @PostMapping("/{id}/members")
-    public ResponseEntity<?> addMembers(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> addMembers(@RequestHeader("X-USERNAME") String usernameHeader,
                                         @PathVariable Long id,
                                         @RequestBody AddMembersRequest req) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = chatroomService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         try {
             List<User> added = chatroomService.addMembers(id, userId, req.getMemberIds());
             return ResponseEntity.ok(added);

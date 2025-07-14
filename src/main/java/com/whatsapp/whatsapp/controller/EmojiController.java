@@ -8,6 +8,7 @@ import com.whatsapp.whatsapp.repository.MessageRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
 import com.whatsapp.whatsapp.service.EmojiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,25 +16,25 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/messages/{messageId}/emoji")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class EmojiController {
-    private final EmojiService emojiService;
+    @Autowired
+    private EmojiService emojiService;
 
-    private Long getUserIdFromHeader(String userIdHeader) {
-        try {
-            return Long.parseLong(userIdHeader);
-        } catch (Exception e) {
-            return null;
-        }
+    private String getUsernameFromHeader(String usernameHeader) {
+        return usernameHeader;
     }
 
     // Add or replace emoji reaction
     @PostMapping
-    public ResponseEntity<?> addOrReplaceEmoji(@RequestHeader("X-USER-ID") String userIdHeader,
+    public ResponseEntity<?> addOrReplaceEmoji(@RequestHeader("X-USERNAME") String usernameHeader,
                                                @PathVariable Long messageId,
                                                @RequestBody EmojiRequest req) {
-        Long userId = getUserIdFromHeader(userIdHeader);
-        if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
+        String username = getUsernameFromHeader(usernameHeader);
+        if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
+        Optional<User> userOpt = emojiService.getUserByUsername(username);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Long userId = userOpt.get().getId();
         try {
             MessageEmoji emoji = emojiService.addOrReplaceEmoji(messageId, userId, req.getEmojiType());
             return ResponseEntity.ok(emoji);
