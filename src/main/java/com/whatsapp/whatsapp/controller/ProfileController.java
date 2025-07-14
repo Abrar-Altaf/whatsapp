@@ -2,6 +2,7 @@ package com.whatsapp.whatsapp.controller;
 
 import com.whatsapp.whatsapp.entity.User;
 import com.whatsapp.whatsapp.repository.UserRepository;
+import com.whatsapp.whatsapp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,7 @@ import java.util.Optional;
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
 public class ProfileController {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     // Simulate authentication: userId from header
     private Long getUserIdFromHeader(String userIdHeader) {
@@ -27,8 +28,8 @@ public class ProfileController {
     public ResponseEntity<?> getProfile(@RequestHeader("X-USER-ID") String userIdHeader) {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
-        Optional<User> user = userRepository.findById(userId);
-        return user.map(ResponseEntity::ok)
+        return userService.getUserById(userId)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -37,12 +38,11 @@ public class ProfileController {
                                            @RequestBody User update) {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
-        User user = userOpt.get();
-        user.setDisplayName(update.getDisplayName());
-        user.setAvatarUrl(update.getAvatarUrl());
-        userRepository.save(user);
-        return ResponseEntity.ok(user);
+        try {
+            User user = userService.updateUser(userId, update);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 } 

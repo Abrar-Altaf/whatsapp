@@ -6,6 +6,7 @@ import com.whatsapp.whatsapp.entity.User;
 import com.whatsapp.whatsapp.repository.ChatroomMemberRepository;
 import com.whatsapp.whatsapp.repository.ChatroomRepository;
 import com.whatsapp.whatsapp.repository.UserRepository;
+import com.whatsapp.whatsapp.service.ChatroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,9 +20,7 @@ import java.util.*;
 @RequestMapping("/api/chatrooms")
 @RequiredArgsConstructor
 public class ChatroomController {
-    private final ChatroomRepository chatroomRepository;
-    private final ChatroomMemberRepository chatroomMemberRepository;
-    private final UserRepository userRepository;
+    private final ChatroomService chatroomService;
 
     private Long getUserIdFromHeader(String userIdHeader) {
         try {
@@ -39,9 +38,7 @@ public class ChatroomController {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
         Pageable pageable = PageRequest.of(page, size);
-        Page<ChatroomMember> memberPage = chatroomMemberRepository.findAllByUserId(userId, pageable);
-        List<Chatroom> chatrooms = memberPage.map(ChatroomMember::getChatroom).getContent();
-        return ResponseEntity.ok(chatrooms);
+        return ResponseEntity.ok(chatroomService.listChatroomsForUser(userId, pageable).getContent());
     }
 
     // Create a new chatroom (1:1 or group)
@@ -50,26 +47,12 @@ public class ChatroomController {
                                             @RequestBody CreateChatroomRequest req) {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
-        Optional<User> creatorOpt = userRepository.findById(userId);
-        if (creatorOpt.isEmpty()) return ResponseEntity.badRequest().body("User not found");
-        Chatroom chatroom = Chatroom.builder()
-                .name(req.getName())
-                .isGroup(req.getIsGroup())
-                .build();
-        Chatroom savedChatroom = chatroomRepository.save(chatroom);
-        // Add creator as member
-        chatroomMemberRepository.save(ChatroomMember.builder().chatroom(savedChatroom).user(creatorOpt.get()).build());
-        // Add other members
-        if (req.getMemberIds() != null) {
-            for (Long memberId : req.getMemberIds()) {
-                if (!memberId.equals(userId)) {
-                    userRepository.findById(memberId).ifPresent(user ->
-                        chatroomMemberRepository.save(ChatroomMember.builder().chatroom(savedChatroom).user(user).build())
-                    );
-                }
-            }
+        try {
+            Chatroom chatroom = chatroomService.createChatroom(userId, req.getName(), req.getIsGroup(), req.getMemberIds());
+            return ResponseEntity.ok(chatroom);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok(savedChatroom);
     }
 
     // Get chatroom details
@@ -78,13 +61,13 @@ public class ChatroomController {
                                          @PathVariable Long id) {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
-        Optional<Chatroom> chatroomOpt = chatroomRepository.findById(id);
-        if (chatroomOpt.isEmpty()) return ResponseEntity.notFound().build();
-        // Check membership
-        if (!chatroomMemberRepository.existsByChatroomIdAndUserId(id, userId)) {
-            return ResponseEntity.status(403).body("Not a member");
+        Optional<Chatroom> chatroomOpt = chatroomService.getChatroomForUser(id, userId);
+        if (chatroomOpt.isPresent()) {
+            return ResponseEntity.ok(chatroomOpt.get());
+        } else {
+            // Could be forbidden or not found, but we don't distinguish here
+            return ResponseEntity.status(403).body("Not a member or not found");
         }
-        return ResponseEntity.ok(chatroomOpt.get());
     }
 
     // Add member(s) to chatroom
@@ -94,22 +77,12 @@ public class ChatroomController {
                                         @RequestBody AddMembersRequest req) {
         Long userId = getUserIdFromHeader(userIdHeader);
         if (userId == null) return ResponseEntity.badRequest().body("Invalid user id");
-        if (!chatroomMemberRepository.existsByChatroomIdAndUserId(id, userId)) {
-            return ResponseEntity.status(403).body("Not a member");
+        try {
+            List<User> added = chatroomService.addMembers(id, userId, req.getMemberIds());
+            return ResponseEntity.ok(added);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
         }
-        Optional<Chatroom> chatroomOpt = chatroomRepository.findById(id);
-        if (chatroomOpt.isEmpty()) return ResponseEntity.notFound().build();
-        Chatroom chatroom = chatroomOpt.get();
-        List<User> added = new ArrayList<>();
-        for (Long memberId : req.getMemberIds()) {
-            if (!chatroomMemberRepository.existsByChatroomIdAndUserId(id, memberId)) {
-                userRepository.findById(memberId).ifPresent(user -> {
-                    chatroomMemberRepository.save(ChatroomMember.builder().chatroom(chatroom).user(user).build());
-                    added.add(user);
-                });
-            }
-        }
-        return ResponseEntity.ok(added);
     }
 
     // DTOs

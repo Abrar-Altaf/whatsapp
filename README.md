@@ -5,6 +5,7 @@ A Spring Boot backend server implementing WhatsApp-like chat features: user prof
 ---
 
 ## Features
+- **User Registration & Login**: Register and look up users by username
 - **User Profile**: View and update your profile
 - **Chatrooms**: 1:1 and group chatrooms, add members, list chatrooms (paginated)
 - **Messages**: Send text or attachments (picture/video, max 10MB), list messages (paginated)
@@ -53,33 +54,122 @@ Once running, access Swagger UI at:
 
 ---
 
-## API Endpoints
+## API Reference
 
-### Authentication
-- All endpoints require `X-USER-ID` header (user id, integer). No real login implemented.
+### Registration & Login
+
+#### Register
+- **POST** `/api/register`
+- **Body:**
+  ```json
+  {
+    "username": "alice",
+    "displayName": "Alice",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+  ```
+- **Response:** 200 OK (created user), 409 Conflict (username exists)
+
+#### Login
+- **POST** `/api/register/login`
+- **Body:**
+  ```json
+  { "username": "alice" }
+  ```
+- **Response:** 200 OK (user info), 404 Not Found
+
+---
 
 ### Profile
-- `GET /api/profile` — Get my profile
-- `PUT /api/profile` — Update my profile (displayName, avatarUrl)
+
+#### Get My Profile
+- **GET** `/api/profile`
+- **Headers:** `X-USER-ID: <userId>`
+- **Response:** 200 OK (user info)
+
+#### Update My Profile
+- **PUT** `/api/profile`
+- **Headers:** `X-USER-ID: <userId>`
+- **Body:**
+  ```json
+  {
+    "displayName": "Alice Wonderland",
+    "avatarUrl": "https://example.com/newavatar.png"
+  }
+  ```
+- **Response:** 200 OK (updated user)
+
+---
 
 ### Chatrooms
-- `GET /api/chatrooms?page=0&size=10` — List my chatrooms (paginated)
-- `POST /api/chatrooms` — Create chatroom (1:1 or group)
-  - Body: `{ "name": "Group Name", "isGroup": true, "memberIds": [2,3] }`
-- `GET /api/chatrooms/{id}` — Get chatroom details
-- `POST /api/chatrooms/{id}/members` — Add members
-  - Body: `{ "memberIds": [4,5] }`
+
+#### List My Chatrooms
+- **GET** `/api/chatrooms?page=0&size=10`
+- **Headers:** `X-USER-ID: <userId>`
+- **Response:** 200 OK (list of chatrooms)
+
+#### Create Chatroom
+- **POST** `/api/chatrooms`
+- **Headers:** `X-USER-ID: <userId>`
+- **Body:**
+  ```json
+  {
+    "name": "Group Name",
+    "isGroup": true,
+    "memberIds": [2,3]
+  }
+  ```
+- **Response:** 200 OK (created chatroom)
+
+#### Get Chatroom Details
+- **GET** `/api/chatrooms/{id}`
+- **Headers:** `X-USER-ID: <userId>`
+- **Response:** 200 OK (chatroom info), 403 if not a member
+
+#### Add Members to Chatroom
+- **POST** `/api/chatrooms/{id}/members`
+- **Headers:** `X-USER-ID: <userId>`
+- **Body:**
+  ```json
+  { "memberIds": [4,5] }
+  ```
+- **Response:** 200 OK (list of added users)
+
+---
 
 ### Messages
-- `GET /api/chatrooms/{chatroomId}/messages?page=0&size=20` — List messages (paginated)
-- `POST /api/chatrooms/{chatroomId}/messages` — Send message
-  - Multipart form: `content` (text), `attachment` (file, optional, max 10MB)
-  - Attachments: images saved to `/static/picture`, videos to `/static/video`
+
+#### List Messages in Chatroom
+- **GET** `/api/chatrooms/{chatroomId}/messages?page=0&size=20`
+- **Headers:** `X-USER-ID: <userId>`
+- **Response:** 200 OK (paginated list of messages)
+
+#### Send Message (Text or Attachment)
+- **POST** `/api/chatrooms/{chatroomId}/messages`
+- **Headers:** `X-USER-ID: <userId>`
+- **Content-Type:** `multipart/form-data`
+- **Form fields:**
+  - `content` (text, optional)
+  - `attachment` (file, optional, max 10MB)
+- **Response:** 200 OK (created message)
+
+---
 
 ### Emoji Reactions
-- `POST /api/messages/{messageId}/emoji` — Add/replace emoji
-  - Body: `{ "emojiType": "thumbup" }` (allowed: thumbup, love, crying, surprised)
-- `GET /api/messages/{messageId}/emoji` — List emoji reactions for a message
+
+#### Add/Replace Emoji Reaction
+- **POST** `/api/messages/{messageId}/emoji`
+- **Headers:** `X-USER-ID: <userId>`
+- **Body:**
+  ```json
+  { "emojiType": "thumbup" }
+  ```
+  Allowed: `thumbup`, `love`, `crying`, `surprised`
+- **Response:** 200 OK (emoji reaction)
+
+#### List Emoji Reactions for a Message
+- **GET** `/api/messages/{messageId}/emoji`
+- **Response:** 200 OK (list of emoji reactions)
 
 ---
 
