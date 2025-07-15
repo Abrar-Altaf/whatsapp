@@ -2,6 +2,7 @@ package com.whatsapp.whatsapp.service;
 
 import com.whatsapp.whatsapp.entity.User;
 import java.util.Optional;
+import java.util.List;
 
 public interface UserService {
     User createUser(User user);
@@ -11,4 +12,5 @@ public interface UserService {
     User updateProfileUrl(Long id, String profileUrl);
     Optional<User> getUserByCountryCodeAndMobileNumber(String countryCode, String mobileNumber);
     String generateUniqueUsername();
+    List<User> getUsersByMobileNumbers(List<String> mobileNumbers);
 } 

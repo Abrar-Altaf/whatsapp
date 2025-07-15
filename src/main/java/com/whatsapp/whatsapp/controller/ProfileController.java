@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.Optional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -91,6 +92,15 @@ public class ProfileController {
         } catch (IOException ex) {
             return ResponseEntity.status(500).body("File upload error");
         }
+    }
+
+    @GetMapping("/by-mobile-numbers")
+    public ResponseEntity<?> getUsersByMobileNumbers(@RequestParam("mobileNumbers") List<String> mobileNumbers) {
+        if (mobileNumbers == null || mobileNumbers.isEmpty()) {
+            return ResponseEntity.badRequest().body("mobileNumbers parameter is required");
+        }
+        List<User> users = userService.getUsersByMobileNumbers(mobileNumbers);
+        return ResponseEntity.ok(users);
     }
 
     // DTO for profile update

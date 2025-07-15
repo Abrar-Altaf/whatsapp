@@ -4,6 +4,36 @@ A Spring Boot backend server implementing WhatsApp-like chat features: user prof
 
 ---
 
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST   | /api/register | Register a new user |
+| POST   | /api/login | Login user |
+| GET    | /api/profile | Get current user's profile (header: X-USERNAME) |
+| PUT    | /api/profile | Update current user's profile (header: X-USERNAME) |
+| POST   | /api/profile/upload-picture | Upload profile picture (header: X-USERNAME, multipart) |
+| GET    | /api/profile/by-mobile-numbers?mobileNumbers=123,456 | Get users by a list of mobile numbers |
+| GET    | /api/chatrooms | List chatrooms for user (header: X-USERNAME, paginated) |
+| POST   | /api/chatrooms | Create a new chatroom (header: X-USERNAME) |
+| GET    | /api/chatrooms/{id} | Get chatroom details (header: X-USERNAME) |
+| POST   | /api/chatrooms/{id}/members | Add members to chatroom (header: X-USERNAME) |
+| GET    | /api/chatrooms/{chatroomId}/messages | List messages in chatroom (header: X-USERNAME, paginated) |
+| POST   | /api/chatrooms/{chatroomId}/messages | Send message (header: X-USERNAME, multipart) |
+| POST   | /api/messages/{messageId}/emoji | Add/replace emoji reaction (header: X-USERNAME) |
+| GET    | /api/messages/{messageId}/emoji | List emoji reactions for a message |
+
+---
+
+## Swagger / OpenAPI Links
+
+- [Swagger UI (index)](http://localhost:8080/swagger-ui/index.html)
+- [Swagger UI (legacy)](http://localhost:8080/swagger-ui.html)
+- [OpenAPI JSON](http://localhost:8080/v3/api-docs)
+- [OpenAPI YAML](http://localhost:8080/v3/api-docs.yaml)
+
+---
+
 ## Features
 - **User Registration & Login**: Register and look up users by country code and mobile number
 - **User Profile**: View and update your profile

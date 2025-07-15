@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -102,5 +103,15 @@ public class UserServiceImpl implements UserService {
             username = sb.toString();
         } while (userRepository.findByUsername(username).isPresent());
         return username;
+    }
+
+    @Override
+    public List<User> getUsersByMobileNumbers(List<String> mobileNumbers) {
+        try {
+            return userRepository.findByMobileNumberIn(mobileNumbers);
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return List.of();
+        }
     }
 } 
