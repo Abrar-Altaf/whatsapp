@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddMembersRequest {
-	@JsonProperty(value = "member_ids")
+	@JsonProperty("member_ids")
 	private List<Long> memberIds;
 
 }

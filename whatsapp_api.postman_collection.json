@@ -1,0 +1,302 @@
+{
+  "info": {
+    "_postman_id": "b1e2c3d4-5678-1234-9abc-def012345678",
+    "name": "WhatsApp API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"country_code\": \"+1\", \"mobile_number\": \"1234567890\", \"display_name\": \"John Doe\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["register"]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"country_code\": \"+1\", \"mobile_number\": \"1234567890\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["login"]
+        }
+      }
+    },
+    {
+      "name": "List Chatrooms",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/chatrooms?page=0&size=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Chatroom",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"My Group\", \"is_group\": true, \"member_ids\": [2,3]}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/chatrooms",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms"]
+        }
+      }
+    },
+    {
+      "name": "Get Chatroom by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/chatrooms/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms", "1"]
+        }
+      }
+    },
+    {
+      "name": "Add Members to Chatroom",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_ids\": [4,5]}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/chatrooms/1/members",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms", "1", "members"]
+        }
+      }
+    },
+    {
+      "name": "List Messages in Chatroom",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/chatrooms/1/messages?page=0&size=20",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms", "1", "messages"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Send Message (text only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "content", "value": "Hello world", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/chatrooms/1/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms", "1", "messages"]
+        }
+      }
+    },
+    {
+      "name": "Send Message (with attachment)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "content", "value": "Hello with file", "type": "text" },
+            { "key": "attachment", "type": "file" }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/chatrooms/1/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["chatrooms", "1", "messages"]
+        }
+      }
+    },
+    {
+      "name": "Add or Replace Emoji on Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"emoji_type\": \"LIKE\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/messages/1/emoji",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["messages", "1", "emoji"]
+        }
+      }
+    },
+    {
+      "name": "Get Emojis for a Message",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/messages/1/emoji",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["messages", "1", "emoji"]
+        }
+      }
+    },
+    {
+      "name": "Get Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/profile",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["profile"]
+        }
+      }
+    },
+    {
+      "name": "Update Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"display_name\": \"New Name\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/profile",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["profile"]
+        }
+      }
+    },
+    {
+      "name": "Upload Profile Picture",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "username", "value": "your_username" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file" }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/profile/upload-picture",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["profile", "upload-picture"]
+        }
+      }
+    },
+    {
+      "name": "Fetch Users by Mobile Numbers",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/profile/fetch-users-by-mobile-numbers?mobile_numbers=1234567890&mobile_numbers=9876543210",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["profile", "fetch-users-by-mobile-numbers"],
+          "query": [
+            { "key": "mobile_numbers", "value": "1234567890" },
+            { "key": "mobile_numbers", "value": "9876543210" }
+          ]
+        }
+      }
+    }
+  ]
+} 

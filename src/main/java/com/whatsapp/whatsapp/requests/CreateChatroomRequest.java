@@ -12,11 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateChatroomRequest {
-	 private String name;
-	 
-	 @JsonProperty(value = "is_group")
-     private Boolean isGroup;
-	 
-	 @JsonProperty(value = "member_ids")
-     private List<Long> memberIds;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("is_group")
+    private Boolean isGroup;
+    @JsonProperty("member_ids")
+    private List<Long> memberIds;
 }

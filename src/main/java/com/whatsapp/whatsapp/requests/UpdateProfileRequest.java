@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class UpdateProfileRequest {
 
 	  @NotBlank(message = "Display name cannot be blank.")
-	  @JsonProperty(value = "display_name")
+	  @JsonProperty("display_name")
       private String displayName;
 }

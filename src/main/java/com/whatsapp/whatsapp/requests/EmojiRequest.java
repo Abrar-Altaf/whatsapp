@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmojiRequest {
 	
-	@JsonProperty(value = "emoji_type")
+	@JsonProperty("emoji_type")
 	private String emojiType;
 }

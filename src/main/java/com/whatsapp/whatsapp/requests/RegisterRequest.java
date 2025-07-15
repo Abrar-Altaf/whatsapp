@@ -10,12 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-	@JsonProperty(value = "country_code")
-	private String countryCode;
-	
-	@JsonProperty(value = "mobile_number")
+    @JsonProperty("country_code")
+    private String countryCode;
+    @JsonProperty("mobile_number")
     private String mobileNumber;
-	
-	@JsonProperty(value = "display_name")
+    @JsonProperty("display_name")
     private String displayName;
 }

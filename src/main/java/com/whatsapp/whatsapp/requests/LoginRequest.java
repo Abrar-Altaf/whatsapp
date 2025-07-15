@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginRequest {
 	
-	@JsonProperty(value = "country_code")
-	 private String countryCode;
+	@JsonProperty("country_code")
+    private String countryCode;
 	
-	@JsonProperty(value = "mobile_number")
-     private String mobileNumber;
+	@JsonProperty("mobile_number")
+    private String mobileNumber;
 }

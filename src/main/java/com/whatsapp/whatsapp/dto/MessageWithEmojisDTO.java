@@ -7,25 +7,28 @@ import com.whatsapp.whatsapp.entity.Message;
 
 public class MessageWithEmojisDTO {
 
+    @JsonProperty("id")
     public Long id;
     
+    @JsonProperty("content")
     public String content;
     
-	@JsonProperty(value = "attachment_url")
+	@JsonProperty("attachment_url")
     public String attachmentUrl;
 	
-	@JsonProperty(value = "attachment_type")
+	@JsonProperty("attachment_type")
     public String attachmentType;
 	
-	@JsonProperty(value = "sender_id")
+	@JsonProperty("sender_id")
     public Long senderId;
 	
-	@JsonProperty(value = "chatroom_id")
+	@JsonProperty("chatroom_id")
     public Long chatroomId;
 	
-	@JsonProperty(value = "created_at")
+	@JsonProperty("created_at")
     public String createdAt;
 	
+    @JsonProperty("emojis")
     public List<EmojiDTO> emojis;
     public MessageWithEmojisDTO(Message msg, List<EmojiDTO> emojis) {
         this.id = msg.getId();
