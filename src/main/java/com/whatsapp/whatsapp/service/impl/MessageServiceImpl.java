@@ -23,9 +23,12 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MessageServiceImpl implements MessageService {
+    private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
     @Autowired
     private MessageRepository messageRepository;
     @Autowired
@@ -43,64 +46,84 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Page<Message> listMessages(Long chatroomId, Long userId, Pageable pageable) {
-        if (!chatroomMemberRepository.existsByChatroomIdAndUserId(chatroomId, userId)) {
-            throw new RuntimeException("Not a member");
+        try {
+            if (!chatroomMemberRepository.existsByChatroomIdAndUserId(chatroomId, userId)) {
+                throw new RuntimeException("Not a member");
+            }
+            return messageRepository.findAllByChatroomIdOrderByCreatedAtAsc(chatroomId, pageable);
+        } catch (Exception e) {
+            logger.error("Exception in MessageServiceImpl", e);
+            return Page.empty();
         }
-        return messageRepository.findAllByChatroomIdOrderByCreatedAtAsc(chatroomId, pageable);
     }
 
     @Override
     public Message sendMessage(Long chatroomId, Long userId, String content, MultipartFile attachment) throws IOException {
-        Optional<User> senderOpt = userRepository.findById(userId);
-        if (senderOpt.isEmpty()) throw new RuntimeException("User not found");
-        if (!chatroomMemberRepository.existsByChatroomIdAndUserId(chatroomId, userId)) {
-            throw new RuntimeException("Not a member");
-        }
-        Message.AttachmentType attachmentType = Message.AttachmentType.NONE;
-        String attachmentUrl = null;
-        if (attachment != null && !attachment.isEmpty()) {
-            if (attachment.getSize() > MAX_ATTACHMENT_SIZE) {
-                throw new RuntimeException("Attachment too large (max 10MB)");
+        try {
+            Optional<User> senderOpt = userRepository.findById(userId);
+            if (senderOpt.isEmpty()) throw new RuntimeException("User not found");
+            if (!chatroomMemberRepository.existsByChatroomIdAndUserId(chatroomId, userId)) {
+                throw new RuntimeException("Not a member");
             }
-            String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(attachment.getOriginalFilename()));
-            String ext = StringUtils.getFilenameExtension(originalFilename);
-            String uuid = UUID.randomUUID().toString();
-            String filename = uuid + (ext != null ? "." + ext : "");
-            String subdir;
-            if (isPicture(ext)) {
-                subdir = pictureDir;
-                attachmentType = Message.AttachmentType.PICTURE;
-            } else if (isVideo(ext)) {
-                subdir = videoDir;
-                attachmentType = Message.AttachmentType.VIDEO;
-            } else {
-                throw new RuntimeException("Unsupported attachment type");
+            Message.AttachmentType attachmentType = Message.AttachmentType.NONE;
+            String attachmentUrl = null;
+            if (attachment != null && !attachment.isEmpty()) {
+                if (attachment.getSize() > MAX_ATTACHMENT_SIZE) {
+                    throw new RuntimeException("Attachment too large (max 10MB)");
+                }
+                String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(attachment.getOriginalFilename()));
+                String ext = StringUtils.getFilenameExtension(originalFilename);
+                String uuid = UUID.randomUUID().toString();
+                String filename = uuid + (ext != null ? "." + ext : "");
+                String subdir;
+                if (isPicture(ext)) {
+                    subdir = pictureDir;
+                    attachmentType = Message.AttachmentType.PICTURE;
+                } else if (isVideo(ext)) {
+                    subdir = videoDir;
+                    attachmentType = Message.AttachmentType.VIDEO;
+                } else {
+                    throw new RuntimeException("Unsupported attachment type");
+                }
+                Path dirPath = Paths.get(subdir);
+                Files.createDirectories(dirPath);
+                Path filePath = dirPath.resolve(filename);
+                attachment.transferTo(filePath);
+                attachmentUrl = "/" + filename;
             }
-            Path dirPath = Paths.get(subdir);
-            Files.createDirectories(dirPath);
-            Path filePath = dirPath.resolve(filename);
-            attachment.transferTo(filePath);
-            attachmentUrl = "/" + filename;
+            Message message = Message.builder()
+                    .chatroom(chatroomRepository.getReferenceById(chatroomId))
+                    .sender(senderOpt.get())
+                    .content(content)
+                    .attachmentType(attachmentType)
+                    .attachmentUrl(attachmentUrl)
+                    .createdAt(Instant.now())
+                    .build();
+            return messageRepository.save(message);
+        } catch (Exception e) {
+            logger.error("Exception in MessageServiceImpl", e);
+            return null;
         }
-        Message message = Message.builder()
-                .chatroom(chatroomRepository.getReferenceById(chatroomId))
-                .sender(senderOpt.get())
-                .content(content)
-                .attachmentType(attachmentType)
-                .attachmentUrl(attachmentUrl)
-                .createdAt(Instant.now())
-                .build();
-        return messageRepository.save(message);
     }
 
     @Override
     public Optional<Message> getMessageById(Long messageId) {
-        return messageRepository.findById(messageId);
+        try {
+            return messageRepository.findById(messageId);
+        } catch (Exception e) {
+            logger.error("Exception in MessageServiceImpl", e);
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<com.whatsapp.whatsapp.entity.User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        try {
+            return userRepository.findByUsername(username);
+        } catch (Exception e) {
+            logger.error("Exception in MessageServiceImpl", e);
+            return Optional.empty();
+        }
     }
 
     private boolean isPicture(String ext) {

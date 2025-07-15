@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     @Autowired
     private UserRepository userRepository;
 
@@ -21,39 +24,69 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return null;
+        }
     }
 
     @Override
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+        try {
+            return userRepository.findById(id);
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        try {
+            return userRepository.findByUsername(username);
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return Optional.empty();
+        }
     }
 
     @Override
     public User updateUser(Long id, User update) {
-        return userRepository.findById(id).map(user -> {
-            user.setDisplayName(update.getDisplayName());
-            user.setProfileUrl(update.getProfileUrl());
-            return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            return userRepository.findById(id).map(user -> {
+                user.setDisplayName(update.getDisplayName());
+                user.setProfileUrl(update.getProfileUrl());
+                return userRepository.save(user);
+            }).orElseThrow(() -> new RuntimeException("User not found"));
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return null;
+        }
     }
 
     @Override
     public User updateProfileUrl(Long id, String profileUrl) {
-        return userRepository.findById(id).map(user -> {
-            user.setProfileUrl(profileUrl);
-            return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            return userRepository.findById(id).map(user -> {
+                user.setProfileUrl(profileUrl);
+                return userRepository.save(user);
+            }).orElseThrow(() -> new RuntimeException("User not found"));
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return null;
+        }
     }
 
     @Override
     public Optional<User> getUserByCountryCodeAndMobileNumber(String countryCode, String mobileNumber) {
-        return userRepository.findByCountryCodeAndMobileNumber(countryCode, mobileNumber);
+        try {
+            return userRepository.findByCountryCodeAndMobileNumber(countryCode, mobileNumber);
+        } catch (Exception e) {
+            logger.error("Exception in UserServiceImpl", e);
+            return Optional.empty();
+        }
     }
 
     @Override
