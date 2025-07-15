@@ -1,25 +1,29 @@
 package com.whatsapp.whatsapp.controller;
 
-import com.whatsapp.whatsapp.entity.Chatroom;
-import com.whatsapp.whatsapp.entity.ChatroomMember;
-import com.whatsapp.whatsapp.entity.User;
-import com.whatsapp.whatsapp.repository.ChatroomMemberRepository;
-import com.whatsapp.whatsapp.repository.ChatroomRepository;
-import com.whatsapp.whatsapp.repository.UserRepository;
-import com.whatsapp.whatsapp.service.ChatroomService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import com.whatsapp.whatsapp.entity.Chatroom;
+import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.requests.AddMembersRequest;
+import com.whatsapp.whatsapp.requests.CreateChatroomRequest;
+import com.whatsapp.whatsapp.service.ChatroomService;
 
 @RestController
-@RequestMapping("/api/chatrooms")
-//@RequiredArgsConstructor
+@RequestMapping("/chatrooms")
 public class ChatroomController {
     @Autowired
     private ChatroomService chatroomService;
@@ -27,8 +31,6 @@ public class ChatroomController {
     private String getUsernameFromHeader(String usernameHeader) {
         return usernameHeader;
     }
-
-    // List my chatrooms (paginated)
     @GetMapping
     public ResponseEntity<?> listChatrooms(@RequestHeader("username") String usernameHeader,
                                            @RequestParam(defaultValue = "0") int page,
@@ -42,7 +44,6 @@ public class ChatroomController {
         return ResponseEntity.ok(chatroomService.listChatroomsForUser(userId, pageable).getContent());
     }
 
-    // Create a new chatroom (1:1 or group)
     @PostMapping
     public ResponseEntity<?> createChatroom(@RequestHeader("username") String usernameHeader,
                                             @RequestBody CreateChatroomRequest req) {
@@ -58,8 +59,6 @@ public class ChatroomController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // Get chatroom details
     @GetMapping("/{id}")
     public ResponseEntity<?> getChatroom(@RequestHeader("username") String usernameHeader,
                                          @PathVariable Long id) {
@@ -72,12 +71,9 @@ public class ChatroomController {
         if (chatroomOpt.isPresent()) {
             return ResponseEntity.ok(chatroomOpt.get());
         } else {
-            // Could be forbidden or not found, but we don't distinguish here
             return ResponseEntity.status(403).body("Not a member or not found");
         }
     }
-
-    // Add member(s) to chatroom
     @PostMapping("/{id}/members")
     public ResponseEntity<?> addMembers(@RequestHeader("username") String usernameHeader,
                                         @PathVariable Long id,
@@ -94,16 +90,5 @@ public class ChatroomController {
             return ResponseEntity.status(403).body(e.getMessage());
         }
     }
-
-    // DTOs
-    @lombok.Data
-    public static class CreateChatroomRequest {
-        private String name;
-        private Boolean isGroup;
-        private List<Long> memberIds;
-    }
-    @lombok.Data
-    public static class AddMembersRequest {
-        private List<Long> memberIds;
-    }
+ 
 } 

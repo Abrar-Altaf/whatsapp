@@ -19,10 +19,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // In-memory OTP store: key = countryCode+mobileNumber, value = otp
-    private final ConcurrentHashMap<String, String> otpStore = new ConcurrentHashMap<>();
-    private static final String DUMMY_OTP = "123456";
-
     @Override
     public User createUser(User user) {
         try {

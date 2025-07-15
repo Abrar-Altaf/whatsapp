@@ -1,22 +1,23 @@
 package com.whatsapp.whatsapp.service.impl;
 
-import com.whatsapp.whatsapp.entity.Message;
-import com.whatsapp.whatsapp.entity.MessageEmoji;
-import com.whatsapp.whatsapp.entity.User;
-import com.whatsapp.whatsapp.repository.MessageEmojiRepository;
-import com.whatsapp.whatsapp.repository.MessageRepository;
-import com.whatsapp.whatsapp.repository.UserRepository;
-import com.whatsapp.whatsapp.service.EmojiService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.whatsapp.whatsapp.entity.Message;
+import com.whatsapp.whatsapp.entity.MessageEmoji;
+import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.enums.EmojiType;
+import com.whatsapp.whatsapp.repository.MessageEmojiRepository;
+import com.whatsapp.whatsapp.repository.MessageRepository;
+import com.whatsapp.whatsapp.repository.UserRepository;
+import com.whatsapp.whatsapp.service.EmojiService;
 
 @Service
 public class EmojiServiceImpl implements EmojiService {
@@ -35,20 +36,19 @@ public class EmojiServiceImpl implements EmojiService {
             if (userOpt.isEmpty()) throw new RuntimeException("User not found");
             Optional<Message> messageOpt = messageRepository.findById(messageId);
             if (messageOpt.isEmpty()) throw new RuntimeException("Message not found");
-            MessageEmoji.EmojiType emojiType;
+            EmojiType emojiType;
             try {
-                emojiType = MessageEmoji.EmojiType.valueOf(emojiTypeStr.toUpperCase());
+                emojiType = EmojiType.valueOf(emojiTypeStr.toUpperCase());
             } catch (Exception e) {
                 throw new RuntimeException("Invalid emoji type");
             }
-            if (!EnumSet.of(MessageEmoji.EmojiType.THUMBUP, MessageEmoji.EmojiType.LOVE, MessageEmoji.EmojiType.CRYING, MessageEmoji.EmojiType.SURPRISED).contains(emojiType)) {
+            if (!EnumSet.of(EmojiType.THUMBUP, EmojiType.LOVE, EmojiType.CRYING, EmojiType.SURPRISED).contains(emojiType)) {
                 throw new RuntimeException("Unsupported emoji type");
             }
             messageEmojiRepository.findAll().stream()
                     .filter(e -> e.getMessage().getId().equals(messageId) && e.getUser().getId().equals(userId))
                     .findFirst()
                     .ifPresent(messageEmojiRepository::delete);
-            // Add new reaction
             MessageEmoji emoji = MessageEmoji.builder()
                     .message(messageOpt.get())
                     .user(userOpt.get())

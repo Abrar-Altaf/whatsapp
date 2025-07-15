@@ -1,17 +1,19 @@
 package com.whatsapp.whatsapp.controller;
 
-import com.whatsapp.whatsapp.entity.User;
-import com.whatsapp.whatsapp.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.security.SecureRandom;
+import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.requests.LoginRequest;
+import com.whatsapp.whatsapp.requests.RegisterRequest;
+import com.whatsapp.whatsapp.service.UserService;
 
 @RestController
-@RequestMapping("/api")
-//@RequiredArgsConstructor
+@RequestMapping
 public class AuthController {
     @Autowired
     private UserService userService;
@@ -21,11 +23,9 @@ public class AuthController {
         if (req.getCountryCode() == null || req.getMobileNumber() == null || req.getDisplayName() == null) {
             return ResponseEntity.badRequest().body("countryCode, mobileNumber, displayName required");
         }
-        // Check if user already exists
         if (userService.getUserByCountryCodeAndMobileNumber(req.getCountryCode(), req.getMobileNumber()).isPresent()) {
             return ResponseEntity.status(409).body("User already exists");
         }
-        // Generate unique username
         String generatedUsername = userService.generateUniqueUsername();
         User user = User.builder()
                 .countryCode(req.getCountryCode())
@@ -50,15 +50,5 @@ public class AuthController {
         }
     }
 
-    @lombok.Data
-    public static class RegisterRequest {
-        private String countryCode;
-        private String mobileNumber;
-        private String displayName;
-    }
-    @lombok.Data
-    public static class LoginRequest {
-        private String countryCode;
-        private String mobileNumber;
-    }
+  
 } 

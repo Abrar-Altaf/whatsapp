@@ -1,6 +1,8 @@
 package com.whatsapp.whatsapp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.whatsapp.whatsapp.enums.AttachmentType;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -29,11 +31,13 @@ public class Message {
     private String content;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "attachment_type")
     private AttachmentType attachmentType; // PICTURE, VIDEO, NONE
 
+    @Column(name = "attachment_url")
     private String attachmentUrl;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "created_at")
     private Instant createdAt;
 
     @PrePersist
@@ -41,7 +45,5 @@ public class Message {
         this.createdAt = Instant.now();
     }
 
-    public enum AttachmentType {
-        NONE, PICTURE, VIDEO
-    }
+  
 } 

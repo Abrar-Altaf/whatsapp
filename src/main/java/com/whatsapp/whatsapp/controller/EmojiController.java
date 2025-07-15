@@ -1,22 +1,24 @@
 package com.whatsapp.whatsapp.controller;
 
-import com.whatsapp.whatsapp.entity.Message;
-import com.whatsapp.whatsapp.entity.MessageEmoji;
-import com.whatsapp.whatsapp.entity.User;
-import com.whatsapp.whatsapp.repository.MessageEmojiRepository;
-import com.whatsapp.whatsapp.repository.MessageRepository;
-import com.whatsapp.whatsapp.repository.UserRepository;
-import com.whatsapp.whatsapp.service.EmojiService;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import com.whatsapp.whatsapp.entity.MessageEmoji;
+import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.requests.EmojiRequest;
+import com.whatsapp.whatsapp.service.EmojiService;
 
 @RestController
-@RequestMapping("/api/messages/{messageId}/emoji")
-//@RequiredArgsConstructor
+@RequestMapping("/messages/{messageId}/emoji")
 public class EmojiController {
     @Autowired
     private EmojiService emojiService;
@@ -24,8 +26,6 @@ public class EmojiController {
     private String getUsernameFromHeader(String usernameHeader) {
         return usernameHeader;
     }
-
-    // Add or replace emoji reaction
     @PostMapping
     public ResponseEntity<?> addOrReplaceEmoji(@RequestHeader("username") String usernameHeader,
                                                @PathVariable Long messageId,
@@ -42,15 +42,10 @@ public class EmojiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // Get emoji reactions for a message
     @GetMapping
     public ResponseEntity<?> getEmojis(@PathVariable Long messageId) {
         return ResponseEntity.ok(emojiService.getEmojisForMessage(messageId));
     }
 
-    @lombok.Data
-    public static class EmojiRequest {
-        private String emojiType;
-    }
+
 } 

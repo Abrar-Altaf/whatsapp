@@ -2,6 +2,7 @@ package com.whatsapp.whatsapp.service.impl;
 
 import com.whatsapp.whatsapp.entity.Message;
 import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.enums.AttachmentType;
 import com.whatsapp.whatsapp.repository.ChatroomMemberRepository;
 import com.whatsapp.whatsapp.repository.ChatroomRepository;
 import com.whatsapp.whatsapp.repository.MessageRepository;
@@ -65,7 +66,7 @@ public class MessageServiceImpl implements MessageService {
             if (!chatroomMemberRepository.existsByChatroomIdAndUserId(chatroomId, userId)) {
                 throw new RuntimeException("Not a member");
             }
-            Message.AttachmentType attachmentType = Message.AttachmentType.NONE;
+            AttachmentType attachmentType = AttachmentType.NONE;
             String attachmentUrl = null;
             if (attachment != null && !attachment.isEmpty()) {
                 if (attachment.getSize() > MAX_ATTACHMENT_SIZE) {
@@ -78,10 +79,10 @@ public class MessageServiceImpl implements MessageService {
                 String subdir;
                 if (isPicture(ext)) {
                     subdir = pictureDir;
-                    attachmentType = Message.AttachmentType.PICTURE;
+                    attachmentType = AttachmentType.PICTURE;
                 } else if (isVideo(ext)) {
                     subdir = videoDir;
-                    attachmentType = Message.AttachmentType.VIDEO;
+                    attachmentType = AttachmentType.VIDEO;
                 } else {
                     throw new RuntimeException("Unsupported attachment type");
                 }

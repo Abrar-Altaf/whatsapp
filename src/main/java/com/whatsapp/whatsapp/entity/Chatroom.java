@@ -20,10 +20,10 @@ public class Chatroom {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false , name = "is_group")
     private Boolean isGroup;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "created_at")
     private Instant createdAt;
 
     @PrePersist

@@ -1,32 +1,37 @@
 package com.whatsapp.whatsapp.controller;
 
-import com.whatsapp.whatsapp.entity.User;
-import com.whatsapp.whatsapp.repository.UserRepository;
-import com.whatsapp.whatsapp.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.whatsapp.whatsapp.entity.User;
+import com.whatsapp.whatsapp.requests.UpdateProfileRequest;
+import com.whatsapp.whatsapp.service.UserService;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/profile")
-//@RequiredArgsConstructor
+@RequestMapping("/profile")
 public class ProfileController {
     @Autowired
     private UserService userService;
 
-    // Simulate authentication: username from header
     private String getUsernameFromHeader(String usernameHeader) {
         return usernameHeader;
     }
@@ -50,9 +55,6 @@ public class ProfileController {
         try {
             User users = userOpt.get();
             users.setDisplayName(update.getDisplayName());
-            if (update.getProfileUrl() != null) {
-                users.setProfileUrl(update.getProfileUrl());
-            }
             User user = userService.updateUser(users.getId(), users);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
@@ -94,20 +96,12 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/by-mobile-numbers")
-    public ResponseEntity<?> getUsersByMobileNumbers(@RequestParam("mobileNumbers") List<String> mobileNumbers) {
+    @GetMapping("/fetch-users-by-mobile-numbers")
+    public ResponseEntity<?> getUsersByMobileNumbers(@RequestParam("mobile_numbers") List<String> mobileNumbers) {
         if (mobileNumbers == null || mobileNumbers.isEmpty()) {
             return ResponseEntity.badRequest().body("mobileNumbers parameter is required");
         }
         List<User> users = userService.getUsersByMobileNumbers(mobileNumbers);
         return ResponseEntity.ok(users);
-    }
-
-    // DTO for profile update
-    @lombok.Data
-    public static class UpdateProfileRequest {
-        @NotBlank
-        private String displayName;
-        private String profileUrl;
     }
 } 

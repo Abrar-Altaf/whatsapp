@@ -48,9 +48,7 @@ public class ChatroomServiceImpl implements ChatroomService {
                     .isGroup(isGroup)
                     .build();
             Chatroom savedChatroom = chatroomRepository.save(chatroom);
-            // Add creator as member
             chatroomMemberRepository.save(ChatroomMember.builder().chatroom(savedChatroom).user(creatorOpt.get()).build());
-            // Add other members
             if (memberIds != null) {
                 for (Long memberId : memberIds) {
                     if (!memberId.equals(creatorId)) {

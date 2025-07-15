@@ -1,34 +1,34 @@
 package com.whatsapp.whatsapp.controller;
 
-import com.whatsapp.whatsapp.entity.*;
-import com.whatsapp.whatsapp.repository.*;
-import com.whatsapp.whatsapp.service.MessageService;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.whatsapp.whatsapp.entity.MessageEmoji;
+import com.whatsapp.whatsapp.dto.EmojiDTO;
+import com.whatsapp.whatsapp.dto.MessageWithEmojisDTO;
+import com.whatsapp.whatsapp.entity.Message;
+import com.whatsapp.whatsapp.entity.User;
 import com.whatsapp.whatsapp.repository.MessageEmojiRepository;
-import java.util.stream.Collectors;
+import com.whatsapp.whatsapp.service.MessageService;
 
 @RestController
-@RequestMapping("/api/chatrooms/{chatroomId}/messages")
-//@RequiredArgsConstructor
+@RequestMapping("/chatrooms/{chatroomId}/messages")
 public class MessageController {
     @Autowired
     private MessageService messageService;
@@ -39,13 +39,10 @@ public class MessageController {
     private String pictureDir;
     @Value("${attachment.video.dir:src/main/resources/static/video}")
     private String videoDir;
-    private static final long MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 
     private String getUsernameFromHeader(String usernameHeader) {
         return usernameHeader;
     }
-
-    // List messages in chatroom (paginated)
     @GetMapping
     public ResponseEntity<?> listMessages(@RequestHeader("username") String usernameHeader,
                                           @PathVariable Long chatroomId,
@@ -59,7 +56,6 @@ public class MessageController {
         Pageable pageable = PageRequest.of(page, size);
         try {
             Page<Message> messages = messageService.listMessages(chatroomId, userId, pageable);
-            // Aggregate emojis for each message
             List<MessageWithEmojisDTO> result = messages.getContent().stream().map(msg -> {
                 List<EmojiDTO> emojis = messageEmojiRepository.findAll().stream()
                     .filter(e -> e.getMessage().getId().equals(msg.getId()))
@@ -73,7 +69,6 @@ public class MessageController {
         }
     }
 
-    // Send a message (text or attachment)
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<?> sendMessage(@RequestHeader("username") String usernameHeader,
                                          @PathVariable Long chatroomId,
@@ -94,33 +89,5 @@ public class MessageController {
         }
     }
 
-    // DTOs for message+emojis
-    public static class MessageWithEmojisDTO {
-        public Long id;
-        public String content;
-        public String attachmentUrl;
-        public String attachmentType;
-        public Long senderId;
-        public Long chatroomId;
-        public String createdAt;
-        public List<EmojiDTO> emojis;
-        public MessageWithEmojisDTO(Message msg, List<EmojiDTO> emojis) {
-            this.id = msg.getId();
-            this.content = msg.getContent();
-            this.attachmentUrl = msg.getAttachmentUrl();
-            this.attachmentType = msg.getAttachmentType() != null ? msg.getAttachmentType().name() : null;
-            this.senderId = msg.getSender() != null ? msg.getSender().getId() : null;
-            this.chatroomId = msg.getChatroom() != null ? msg.getChatroom().getId() : null;
-            this.createdAt = msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : null;
-            this.emojis = emojis;
-        }
-    }
-    public static class EmojiDTO {
-        public Long userId;
-        public String emojiType;
-        public EmojiDTO(Long userId, String emojiType) {
-            this.userId = userId;
-            this.emojiType = emojiType;
-        }
-    }
+   
 } 

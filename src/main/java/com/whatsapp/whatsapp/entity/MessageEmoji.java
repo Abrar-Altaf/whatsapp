@@ -1,5 +1,7 @@
 package com.whatsapp.whatsapp.entity;
 
+import com.whatsapp.whatsapp.enums.EmojiType;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,10 +27,8 @@ public class MessageEmoji {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "emoji_type")
     private EmojiType emojiType;
 
-    public enum EmojiType {
-        THUMBUP, LOVE, CRYING, SURPRISED
-    }
+  
 } 

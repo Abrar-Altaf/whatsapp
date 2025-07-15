@@ -23,7 +23,7 @@ public class ChatroomMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "joined_at")
     private Instant joinedAt;
 
     @PrePersist

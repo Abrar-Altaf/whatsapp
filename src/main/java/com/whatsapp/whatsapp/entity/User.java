@@ -23,7 +23,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "display_name")
     private String displayName;
 
     @Column(name = "country_code", nullable = false)
@@ -32,5 +32,6 @@ public class User {
     @Column(name = "mobile_number", nullable = false)
     private String mobileNumber;
 
+    @Column(name = "profile_url")
     private String profileUrl;
 } 
