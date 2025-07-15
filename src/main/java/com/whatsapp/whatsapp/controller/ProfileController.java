@@ -31,7 +31,7 @@ public class ProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getProfile(@RequestHeader("X-USERNAME") String usernameHeader) {
+    public ResponseEntity<?> getProfile(@RequestHeader("username") String usernameHeader) {
         String username = getUsernameFromHeader(usernameHeader);
         if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
         return userService.getUserByUsername(username)
@@ -40,7 +40,7 @@ public class ProfileController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateProfile(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> updateProfile(@RequestHeader("username") String usernameHeader,
                                            @Valid @RequestBody UpdateProfileRequest update) {
         String username = getUsernameFromHeader(usernameHeader);
         if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
@@ -60,7 +60,7 @@ public class ProfileController {
     }
 
     @PostMapping("/upload-picture")
-    public ResponseEntity<?> uploadProfilePicture(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> uploadProfilePicture(@RequestHeader("username") String usernameHeader,
                                                   @RequestParam("file") MultipartFile file) {
         String username = getUsernameFromHeader(usernameHeader);
         if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
@@ -85,7 +85,7 @@ public class ProfileController {
             Files.createDirectories(dirPath);
             Path filePath = dirPath.resolve(filename);
             file.transferTo(filePath);
-            String url = "/static/profile/" + filename;
+            String url = "/" + filename;
             userService.updateProfileUrl(user.getId(), url);
             return ResponseEntity.ok().body(java.util.Collections.singletonMap("profileUrl", url));
         } catch (IOException ex) {

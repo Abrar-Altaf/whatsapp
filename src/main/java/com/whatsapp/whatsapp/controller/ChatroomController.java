@@ -30,7 +30,7 @@ public class ChatroomController {
 
     // List my chatrooms (paginated)
     @GetMapping
-    public ResponseEntity<?> listChatrooms(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> listChatrooms(@RequestHeader("username") String usernameHeader,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size) {
         String username = getUsernameFromHeader(usernameHeader);
@@ -44,7 +44,7 @@ public class ChatroomController {
 
     // Create a new chatroom (1:1 or group)
     @PostMapping
-    public ResponseEntity<?> createChatroom(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> createChatroom(@RequestHeader("username") String usernameHeader,
                                             @RequestBody CreateChatroomRequest req) {
         String username = getUsernameFromHeader(usernameHeader);
         if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
@@ -61,7 +61,7 @@ public class ChatroomController {
 
     // Get chatroom details
     @GetMapping("/{id}")
-    public ResponseEntity<?> getChatroom(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> getChatroom(@RequestHeader("username") String usernameHeader,
                                          @PathVariable Long id) {
         String username = getUsernameFromHeader(usernameHeader);
         if (username == null || username.isEmpty()) return ResponseEntity.badRequest().body("Invalid username");
@@ -79,7 +79,7 @@ public class ChatroomController {
 
     // Add member(s) to chatroom
     @PostMapping("/{id}/members")
-    public ResponseEntity<?> addMembers(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> addMembers(@RequestHeader("username") String usernameHeader,
                                         @PathVariable Long id,
                                         @RequestBody AddMembersRequest req) {
         String username = getUsernameFromHeader(usernameHeader);

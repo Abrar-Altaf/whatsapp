@@ -27,7 +27,7 @@ public class EmojiController {
 
     // Add or replace emoji reaction
     @PostMapping
-    public ResponseEntity<?> addOrReplaceEmoji(@RequestHeader("X-USERNAME") String usernameHeader,
+    public ResponseEntity<?> addOrReplaceEmoji(@RequestHeader("username") String usernameHeader,
                                                @PathVariable Long messageId,
                                                @RequestBody EmojiRequest req) {
         String username = getUsernameFromHeader(usernameHeader);

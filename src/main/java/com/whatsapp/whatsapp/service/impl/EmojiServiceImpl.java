@@ -40,7 +40,6 @@ public class EmojiServiceImpl implements EmojiService {
         if (!EnumSet.of(MessageEmoji.EmojiType.THUMBUP, MessageEmoji.EmojiType.LOVE, MessageEmoji.EmojiType.CRYING, MessageEmoji.EmojiType.SURPRISED).contains(emojiType)) {
             throw new RuntimeException("Unsupported emoji type");
         }
-        // Remove existing reaction by this user
         messageEmojiRepository.findAll().stream()
                 .filter(e -> e.getMessage().getId().equals(messageId) && e.getUser().getId().equals(userId))
                 .findFirst()

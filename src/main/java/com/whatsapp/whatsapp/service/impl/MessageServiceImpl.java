@@ -80,7 +80,7 @@ public class MessageServiceImpl implements MessageService {
             Files.createDirectories(dirPath);
             Path filePath = dirPath.resolve(filename);
             attachment.transferTo(filePath);
-            attachmentUrl = "/static/" + (attachmentType == Message.AttachmentType.PICTURE ? "picture/" : "video/") + filename;
+            attachmentUrl = "/" + filename;
         }
         Message message = Message.builder()
                 .chatroom(chatroomRepository.getReferenceById(chatroomId))
