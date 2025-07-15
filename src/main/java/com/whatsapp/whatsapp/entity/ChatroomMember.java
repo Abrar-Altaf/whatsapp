@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "chatroom_members")
 @Data
@@ -24,6 +26,7 @@ public class ChatroomMember {
     private User user;
 
     @Column(nullable = false, updatable = false, name = "joined_at")
+    @JsonProperty("joined_at")
     private Instant joinedAt;
 
     @PrePersist

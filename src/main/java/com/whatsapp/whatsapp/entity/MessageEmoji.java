@@ -1,5 +1,6 @@
 package com.whatsapp.whatsapp.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.whatsapp.whatsapp.enums.EmojiType;
 
 import jakarta.persistence.*;
@@ -28,6 +29,7 @@ public class MessageEmoji {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "emoji_type")
+    @JsonProperty("emoji_type")
     private EmojiType emojiType;
 
   

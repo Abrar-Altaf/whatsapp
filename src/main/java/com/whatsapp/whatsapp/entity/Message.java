@@ -1,6 +1,7 @@
 package com.whatsapp.whatsapp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.whatsapp.whatsapp.enums.AttachmentType;
 
 import jakarta.persistence.*;
@@ -32,12 +33,15 @@ public class Message {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "attachment_type")
+    @JsonProperty("attachment_type")
     private AttachmentType attachmentType; // PICTURE, VIDEO, NONE
 
     @Column(name = "attachment_url")
+    @JsonProperty("attachment_url")
     private String attachmentUrl;
 
     @Column(nullable = false, updatable = false, name = "created_at")
+    @JsonProperty("created_at")
     private Instant createdAt;
 
     @PrePersist
