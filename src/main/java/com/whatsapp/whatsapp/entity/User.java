@@ -30,10 +30,11 @@ public class User {
     private String displayName;
 
     @Column(name = "country_code", nullable = false)
+    @JsonProperty("country_code")
     private String countryCode;
 
     @Column(name = "mobile_number", nullable = false)
-    @JsonProperty("country_code")
+    @JsonProperty("mobile_number")
     private String mobileNumber;
 
     @Column(name = "profile_url")
