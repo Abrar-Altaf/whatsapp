@@ -93,9 +93,9 @@ Once running, access Swagger UI at:
 - **Body:**
   ```json
   {
-    "countryCode": "+1",
-    "mobileNumber": "1234567890",
-    "displayName": "Alice"
+    "country_code": "+1",
+    "mobile_number": "1234567890",
+    "display_name": "Alice"
   }
   ```
 - **Response:** 200 OK (created user, includes generated `username`), 409 Conflict (user already exists)
@@ -105,8 +105,8 @@ Once running, access Swagger UI at:
 - **Body:**
   ```json
   {
-    "countryCode": "+1",
-    "mobileNumber": "1234567890"
+    "country_code": "+1",
+    "mobile_number": "1234567890"
   }
   ```
 - **Response:** 200 OK (user info), 404 Not Found
@@ -126,8 +126,8 @@ Once running, access Swagger UI at:
 - **Body:**
   ```json
   {
-    "displayName": "Alice Wonderland",
-    "profileUrl": "https://example.com/newavatar.png"
+    "display_name": "Alice Wonderland",
+    "profile_url": "https://example.com/newavatar.png"
   }
   ```
 - **Response:** 200 OK (updated user)
@@ -157,8 +157,8 @@ Once running, access Swagger UI at:
   ```json
   {
     "name": "Group Name",
-    "isGroup": true,
-    "memberIds": [2,3]
+    "is_group": true,
+    "member_ids": [2,3]
   }
   ```
 - **Response:** 200 OK (created chatroom)
@@ -173,7 +173,7 @@ Once running, access Swagger UI at:
 - **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
-  { "memberIds": [4,5] }
+  { "member_ids": [4,5] }
   ```
 - **Response:** 200 OK (list of added users)
 
@@ -204,7 +204,7 @@ Once running, access Swagger UI at:
 - **Headers:** `X-USERNAME: <username>`
 - **Body:**
   ```json
-  { "emojiType": "thumbup" }
+  { "emoji_type": "thumbup" }
   ```
   Allowed: `thumbup`, `love`, `crying`, `surprised`
 - **Response:** 200 OK (emoji reaction)
