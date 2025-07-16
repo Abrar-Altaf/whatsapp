@@ -50,22 +50,22 @@ A Spring Boot backend server implementing WhatsApp-like chat features: user prof
 ### Prerequisites
 - Java 17+
 - Maven
-- PostgreSQL (running locally or accessible remotely)
+- MySQL (running locally or accessible remotely)
 
 ### Database Setup
-1. Start PostgreSQL.
+1. Start MySQL.
 2. Create a database named `whatsapp`:
    ```sh
-   psql -U postgres -c "CREATE DATABASE whatsapp;"
+   mysql -u root -p -e "CREATE DATABASE whatsapp;"
    # (Optional) Create user and grant privileges if needed
-   # psql -U postgres -c "CREATE USER postgres WITH PASSWORD 'postgres';"
-   # psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE whatsapp TO postgres;"
+   # mysql -u root -p -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'yourpassword';"
+   # mysql -u root -p -e "GRANT ALL PRIVILEGES ON whatsapp.* TO 'root'@'localhost';"
    ```
 3. Update `src/main/resources/application.properties` if your DB credentials differ:
    ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/whatsapp
-   spring.datasource.username=postgres
-   spring.datasource.password=postgres
+   spring.datasource.url=jdbc:mysql://localhost:3306/whatsapp?useSSL=false&serverTimezone=UTC
+   spring.datasource.username=root
+   spring.datasource.password=
    ```
 
 ### Build & Run
@@ -232,7 +232,7 @@ Once running, access Swagger UI at:
 
 ## Development Notes
 - ORM: Spring Data JPA
-- DB: PostgreSQL (default), H2 (dev, see commented config)
+- DB: MySQL (default), H2 (dev, see commented config)
 - API docs: Swagger/OpenAPI
 - Simple auth: pass username in `X-USERNAME` header
 - Pagination: all list endpoints
@@ -241,7 +241,7 @@ Once running, access Swagger UI at:
 
 ## Deployment
 - Ready for deployment to any Spring Boot-compatible host (e.g., Render, Railway, Heroku, Fly.io)
-- Ensure PostgreSQL is available and update `application.properties` accordingly
+- Ensure MySQL is available and update `application.properties` accordingly
 
 ---
 
